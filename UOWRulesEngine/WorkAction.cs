@@ -16,6 +16,36 @@ namespace UOWRulesEngine
 	/// <seealso cref="WorkResult">WorkResult Class</seealso>
 	public abstract class WorkAction
 	{
+		/// <summary>
+		/// Stages of the <see cref="WorkAction"/> processing. These are used to enforce certain constraints in the processing pipeline and allow
+		/// implementors to know if they can do something safely such as adding a rule to the rules collection.
+		/// </summary>
+		public enum WorkActionProcessingStage
+		{
+			/// <summary>Runs just before the <see cref="AddRules"/> method is invoked, essentially the beginning of the WorkAction processing.</summary>
+			/// <remarks>This method should have any logic that needs to run in order to add/process the business rules.</remarks>
+			PreAddRules,
+			/// <summary>The Event Hndler that where rules are added to the Rrules collection.</summary>
+			AddRules,
+			/// <summary>The Event Hndler that runs after <see cref="PreAddRules"/> just before the <see cref="AddRules(IList{IWorkRule})"/> is invoked.</summary>
+			PreValidateRules,
+			/// <summary>
+			/// The event handler that actually validates all of the rules is ready to execute. Each rule will have it's Execute method called to validate
+			/// whether or not the rule is satisfied. If it's not a failure will occur and processing will either continue through the other rules or it will
+			/// halt at the first failed rule depending on the 
+			/// </summary>
+			ValidateRules,
+			/// <summary>The Event Hndler that runs after <see cref="PreExecuteRules"/> just before the <see cref="AddRules(IList{IWorkRule})"/> is invoked.</summary>
+			/// <remarks>This is the first method that is run after the rules have all been validated and passed. If any of the rules fail this method is never invoked.</remarks>
+			PreExecuteAction,
+			/// <summary>The Event Hndler that runs after <see cref="PreExecuteAction"/> just before the <see cref="AddRules(IList{IWorkRule})"/> is invoked.</summary>
+			ProcessAction,
+			/// <summary>The Event Hndler that runs after <see cref="PreExecuteAction"/> just before the <see cref="AddRules(IList{IWorkRule})"/> is invoked.</summary>
+			PostExceuteAction,
+			/// <summary>The Event Hndler that runs after <see cref="PreExecuteAction"/> just before the <see cref="AddRules(IList{IWorkRule})"/> is invoked.</summary>
+			ExceptionHandler
+		}
+
 		#region Constructors
 
 		/// <summary>
@@ -51,7 +81,7 @@ namespace UOWRulesEngine
 		/// provide more fine tuned control over the <see cref="WorkAction" /> and to support performing all work inside of a
 		/// <see cref="TransactionScope" /> when spanning multiple <see cref="WorkAction" />s when needed.
 		/// </summary>
-		/// <param name="config">An <see cref="IWorkActionConfiguration" /> object containing the configuration settings desired.</param>
+		/// <param name="config">An <see cref="WorkActionConfiguration" /> object containing the configuration settings desired.</param>
 		protected WorkAction(WorkActionConfiguration config)
 		{
 			Result = WorkActionResult.Unknown;
@@ -59,7 +89,7 @@ namespace UOWRulesEngine
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="WorkAction" /> class, using the provided <see cref="IWorkActionConfiguration" /> object to
+		/// Initializes a new instance of the <see cref="WorkAction" /> class, using the provided <see cref="WorkActionConfiguration" /> object to
 		/// provide more fine tuned control over the <see cref="WorkAction" /> and to support performing all work inside of a
 		/// <see cref="TransactionScope" /> when spanning multiple <see cref="WorkAction" />s when needed, and also the provided
 		/// <see cref="IWorkValidation" /> to set the WorkValidationContext property for chaining actions.
@@ -89,6 +119,11 @@ namespace UOWRulesEngine
 		/// A <see cref="WorkActionConfiguration" /> object containing various settings for the action's behavior.
 		/// </summary>
 		public WorkActionConfiguration Configuration { get; set; }
+		/// <summary>
+		/// A <see cref="WorkActionProcessingStage"/> enum representing the current stage of process used to limit some functionality to only
+		/// certain stages. For example, the last chance to stop processing a WorkAction before work is done is the <see cref="ProcessAction"/> method.
+		/// </summary>
+		public WorkActionProcessingStage ProcessingStage { get; private set; }
 
 		#endregion
 
@@ -109,29 +144,43 @@ namespace UOWRulesEngine
 		{
 			try
 			{
-				//Add all of the business rules to the WorkValidation.Rules collection so that we can check them before performing the action
-				AddRules(WorkValidationContext.Rules);
+				ProcessingStage = WorkActionProcessingStage.PreAddRules;
 
-				//Execute all of the rules to make sure we can run the action
+				// Run any code needed before adding the rules to the collection.
+				PreAddRules ();
+
+				ProcessingStage = WorkActionProcessingStage.AddRules;
+
+				// Add all of the business rules to the WorkValidation.Rules collection so that we can check them before performing the action
+				AddRules (WorkValidationContext.Rules);
+
+				ProcessingStage = WorkActionProcessingStage.PreValidateRules;
+
+				// Run any code that needs to run before the rules collection is validated.
+				PreValidateRules();
+
+				ProcessingStage = WorkActionProcessingStage.PreValidateRules;
+
+				// Execute all of the rules to make sure we can run the action
 				((WorkValidation)WorkValidationContext).ValidateRules();
 
-				//If validation failed return
+				// If validation failed return
 				if (WorkValidationContext.IsValid == false)
 				{
 					Result = WorkActionResult.Fail;
 					return;
 				}
 
-				//Run any pre-processing code
+				// Run any pre-processing code
 				PreExecuteAction();
 
-				//If the rules checked out then go ahead and execute the action itself
+				// If the rules checked out then go ahead and execute the action itself
 				ProcessAction();
 
-				//Run any post-processing code
+				// Run any post-processing code
 				PostExecuteAction();
 
-				//Verify that the action succeeded by setting the Result property to a WorkActionResult value
+				// Verify that the action succeeded by setting the Result property to a WorkActionResult value
 				Result = VerifyAction();
 			}
 			catch (UnitOfWorkException exc)
@@ -152,6 +201,18 @@ namespace UOWRulesEngine
 			}
 		}
 
+		#endregion
+
+		#region Protected Methods
+
+		/// <summary>
+		/// This is the method to override if there is any code that needs to be executed before the rules are added to the collection. An example would be if data
+		/// needed to be gathered or prepared in oroder to properly check the rules.
+		/// </summary>
+		protected virtual void PreAddRules ()
+		{
+		}
+
 		/// <summary>
 		/// This is the method to override to add all of the business rules to the process. All business rules will be added to the 
 		/// <see cref="IWorkValidation.Rules" /> property so that they can be executed when the action is run to validate that the action
@@ -159,6 +220,15 @@ namespace UOWRulesEngine
 		/// </summary>
 		protected virtual void AddRules(IList<IWorkRule> rules)
 		{
+		}
+
+		/// <summary>
+		/// This is the method to override if there is more work to be done to complete the rules check or to prepare data, etc. before the WorkAction's work
+		/// can be completed.
+		/// </summary>
+		protected virtual void PreValidateRules()
+		{
+
 		}
 
 		/// <summary>
@@ -196,6 +266,21 @@ namespace UOWRulesEngine
 			return Result;
 		}
 
+		/// <summary>
+		/// Used to add a <see cref="UnitOfWorkException"/> exception to the failed rules and fail the work action.
+		/// </summary>
+		/// <remarks>
+		/// When this method is called in one of the protected event handlers up to and including the <see cref="ProcessAction"/> method
+		/// the exception information is added as a failed rule to the <see cref="WorkValidation.Rules"/> list, which in turn can then easily
+		/// be accessed from the <see cref="WorkValidation.FailedResults"/> property, and the <see cref="WorkValidation.IsValid"/> property
+		/// will correctly return a false value.
+		/// 
+		/// When this method is used to add a <see cref="UnitOfWorkException"/> exception to the failed rules and fail the work action once the
+		/// <see cref="ProcessAction"/> method has successfully executed, or in scenarios where some of the <see cref="ProcessAction"/> code
+		/// has already affected records such as those in a data store, it is the responsibility of the calling code to handle rolling back
+		/// any data changes via use of a <see cref="TransactionScope"/> object or via some other mechanism to avoid data corruption.
+		/// </remarks>
+		/// <param name="exc"></param>
 		protected virtual void AddThrownExceptionRuleToResults(UnitOfWorkException exc)
 		{
 			//Something went wrong somewhere between the business logic and the repository layer so report it in the results
