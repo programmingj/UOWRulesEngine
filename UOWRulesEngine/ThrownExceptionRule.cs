@@ -2,6 +2,10 @@
 
 namespace UOWRulesEngine
 {
+	/// <summary>
+	/// Used to add a failed rule to the rules collection when an exception has been trapped
+	/// and needs to be reported back to the calling code.
+	/// </summary>
 	public class ThrownExceptionRule : WorkRule
 	{
 		#region Fields

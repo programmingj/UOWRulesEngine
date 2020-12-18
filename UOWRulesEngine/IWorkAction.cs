@@ -14,6 +14,9 @@
 	/// <seealso cref="WorkResult">WorkResult Class</seealso>
 	public interface IWorkAction
 	{
+		/// <inheritdoc cref="WorkAction.Result" select="summary"/>
+		WorkActionResult Result { get; }
+
 		/// <inheritdoc cref="WorkAction.Execute()" select="summary"/>
 		void Execute();
 	}

@@ -44,7 +44,7 @@ namespace UOWRulesEngine
 		/// 
 		/// The <see cref="WorkAction" /> then adds rules to the Rules collection via the <see cref="WorkAction.AddRules(IList&lt;IWorkRule&gt;)"/> method
 		/// overridden in the child class for the action being executed. Each of those <see cref="WorkRule" /> objects is then executed via their
-		/// <see cref="WorkRule.Execute()" /> (command pattern) to ensure business rules are validated. This process adds a <see cref="WorkResult" />
+		/// <see cref="IWorkRule.Execute()" /> (command pattern) to ensure business rules are validated. This process adds a <see cref="WorkResult" />
 		/// object to the Results collection for each business rule executed.
 		/// 
 		/// The collections <see cref="FailedResults" /> and <see cref="PassedResults" /> simply extract out the passed and failed <see cref="WorkResult" />

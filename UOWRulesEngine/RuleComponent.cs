@@ -73,18 +73,26 @@
 		/// This is central to the Command pattern as this is the method the <see cref="Execute()" /> method, exposed by the
 		/// <see cref="IWorkRule" /> interface, calls.
 		/// 
-		/// Implementers: This is the method you need to override to create your rule. It is the actual rule logic.
+		/// Implementer Note: This is the method you need to override to create your rule. It is the actual rule logic.
+		/// 
+		/// Implementer Note: In order for the <see cref="WorkActionConfiguration"/> class'
+		/// <see cref="WorkActionConfiguration.StopRuleProcessingOnFirstFailure"/> property to function as intended implementers
+		/// must implement the Circuit Breaker pattern in this method. If it is not implemented here all rules in the
+		/// <see cref="WorkValidation.Rules"/> collection will be processed regardless of the
+		/// <see cref="WorkActionConfiguration.StopRuleProcessingOnFirstFailure"/> property's value.
 		/// </remarks>
 		/// <example>
 		/// The Verify() method returns an <see cref="IWorkResult" /> object with the results of the rule check. This will determine if the rule has
 		/// passed or failed to the calling code when it's time to verify all rules before executing the <see cref="WorkAction" />. If even one of the
 		/// results objects is marked as IsValid == false then the <see cref="WorkAction" /> code will not be executed.
 		/// <code>
+		/// <![CDATA[
 		/// public override IWorkResult Verify()
 		/// {
 		/// 	IsValid = target.IsNullEmptyWhiteSpace() == false && target.Length == 9;
 		/// 	return new WorkResult(this);
 		/// }
+		/// ]]>
 		/// </code>
 		/// </example>
 		public abstract IWorkResult Verify();

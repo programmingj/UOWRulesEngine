@@ -40,7 +40,7 @@ namespace UOWRulesEngine
 			PreAddRules,
 			/// <summary>The Event Hndler that where rules are added to the Rrules collection.</summary>
 			AddRules,
-			/// <summary>The Event Hndler that runs after <see cref="PreAddRules"/> just before the <see cref="AddRules(IList{IWorkRule})"/> is invoked.</summary>
+			/// <summary>The Event Hndler that runs after <see cref="PreAddRules"/> just before the <see cref="AddRules"/> is invoked.</summary>
 			PreValidateRules,
 			/// <summary>
 			/// The event handler that actually validates all of the rules is ready to execute. Each rule will have it's Execute method called to validate
@@ -154,7 +154,7 @@ namespace UOWRulesEngine
 		/// This is the method exposed by the <see cref="IWorkAction" /> interface (command pattern implementation). The processing of a class that
 		/// implements the <see cref="IWorkAction" /> interface, and that inherits from the <see cref="WorkAction"/> abstract class, begins when the
 		/// calling code executes this nethod. This causes the inherited protected methods in the implementing WorkAction class to be executed in the
-		/// following sequence: <see cref=""/>
+		/// following sequence: 
 		/// The code that gets called behind the scenes is the ProcessAction protected method.
 		/// This is the method exposed by the <see cref="IWorkAction" /> interface. Processing starts by calling the <see cref="AddRules(IList&lt;IWorkRule&gt;)"/>
 		/// method implemented in the classes that inherit from <see cref="WorkAction" /> to get all

@@ -12,7 +12,7 @@ namespace UOWRulesEngine
 	/// You must create a custom exception and inherit from this class in order to have the WorkAction catch the exception during processing.
 	/// </summary>
 	/// <remarks>
-	/// When implementing the <see cref="UnitOfWork" /> library this exception implementation can be utilized in areas "underneath" the business layer,
+	/// When implementing the <see cref="UOWRulesEngine" /> library this exception implementation can be utilized in areas "underneath" the business layer,
 	/// such as the Repository layer, so that they will be caught and reported by the WorkAction implementations while allowing other unexpected
 	/// exceptions to remain unhandled to be caught further up the command chain by default error handlers and the framework.
 	/// 
@@ -26,6 +26,10 @@ namespace UOWRulesEngine
 	{
 		#region Constructors
 
+		/// <summary>
+		/// Default constructor.
+		/// </summary>
+		/// <param name="message"></param>
 		public UnitOfWorkException(string message) : base(message)
 		{
 		}
