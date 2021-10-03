@@ -22,15 +22,18 @@ namespace UOWRulesEngine
 	/// 
 	/// NOTE: The exception handler in the <see cref="WorkAction" /> class display the UnitOfWorkException.Message in the Results
 	/// </remarks>
-	public abstract class UnitOfWorkException : Exception
+	public class UnitOfWorkException : Exception
 	{
 		#region Constructors
 
-		/// <summary>
-		/// Default constructor.
-		/// </summary>
-		/// <param name="message"></param>
+		/// <inheritdoc cref="Exception(string)" path=""/>
 		public UnitOfWorkException(string message) : base(message)
+		{
+		}
+
+		/// <inheritdoc cref="Exception(string, Exception)" path="*"/>
+		public UnitOfWorkException(string message, Exception innerException)
+			: base(message, innerException)
 		{
 		}
 

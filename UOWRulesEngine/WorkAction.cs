@@ -1,23 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Transactions;
 
 namespace UOWRulesEngine
 {
 	/// <summary>
-	/// ==================================== TODO: Update the doc comments to describe the implementation details here ===========================================
-	/// The WorkAction abstract class is the main component of the <see cref="UOWRulesEngine"/> unit of work pattern library. The child classes that implement
-	/// the WorkAction base class define a unit of work and the rules that must be validated before the unit of work can be executed, and provides information
-	/// about the success or failure of the action back to calling code.
+	/// ============= TODO: Update the doc comments to describe the implementation details here =============
+	/// The WorkAction abstract class is the main component of the <see cref="UOWRulesEngine"/> Unit
+	/// of Work pattern library. The child classes that implement the WorkAction base class define a
+	/// unit of work and the rules that must be validated before the unit of work can be executed, and
+	/// provides information about the success or failure of the action back to calling code.
 	/// 
-	/// By encapsulating units of work into a single class any business rules that have to pass for the described work to be completed can also be defined by any
-	/// class implementing <see cref="WorkRule"/>, and the process of getting a single unit of work completed becomes standardized across all functionality in
-	/// the codebase. Any class calling a WorkAction's <see cref="Execute"/> method has a standard way of accessing information about the execution and it's
-	/// success or failure as well as each individual business rule, whether it passed or failed and provides that data in a standardized way.
+	/// By encapsulating units of work into a single class any business rules that have to pass for
+	/// the described work to be completed can also be defined by any class implementing
+	/// <see cref="WorkRule"/>, and the process of getting a single unit of work completed becomes
+	/// standardized across all functionality in the codebase. Any class calling a WorkAction's
+	/// <see cref="Execute"/> method has a standard way of accessing information about the execution
+	/// and it's success or failure as well as each individual business rule, whether it passed or
+	/// failed and provides that data in a standardized way.
 	/// 
-	/// The business rules are added to the collection of business rules that must pass in order for the <see cref="ProcessAction"/> method to execute via the
-	/// ==========================================================================================================================================================
-	/// <see cref="AddRules(IList{IWorkRule})"/> method.
+	/// The business rules are added to the collection of business rules that must pass in order for
+	/// the <see cref="ProcessAction"/> method to execute via the <see cref="AddRules(IList{IWorkRule})"/>
+	/// method.
+	/// =====================================================================================================
+	/// 
 	/// </summary>
 	/// <seealso cref="IWorkRule">IWorkRule Interface</seealso>
 	/// <seealso cref="WorkRule">WorkRule Class</seealso>
@@ -30,43 +37,79 @@ namespace UOWRulesEngine
 	public abstract class WorkAction
 	{
 		/// <summary>
-		/// Describes the stages of the <see cref="WorkAction"/> processing. These are used to enforce certain constraints in the processing pipeline and allow
-		/// implementors to know if they can do something safely such as adding a rule to the rules collection.
+		/// Describes the stages of the <see cref="WorkAction"/> processing. These are used to enforce certain
+		/// constraints in the processing pipeline and allow implementors to know if they can do something
+		/// safely such as adding a rule to the rules collection.
 		/// </summary>
 		public enum WorkActionProcessingStage
 		{
-			/// <summary>Runs just before the <see cref="AddRules"/> method is invoked, essentially the beginning of the WorkAction processing.</summary>
-			/// <remarks>This method should have any logic that needs to run in order to add/process the business rules.</remarks>
+			/// <summary>Runs just before the <see cref="AddRules"/> method is invoked, essentially the
+			/// beginning of the WorkAction processing.
+			/// </summary>
+			/// <remarks>
+			/// This method should have any logic that needs to run in order to add/process the business rules.
+			/// </remarks>
 			PreAddRules,
 			/// <summary>The Event Hndler that where rules are added to the Rrules collection.</summary>
 			AddRules,
-			/// <summary>The Event Hndler that runs after <see cref="PreAddRules"/> just before the <see cref="AddRules"/> is invoked.</summary>
+			/// <summary>The Event Hndler that runs after <see cref="PreAddRules"/> just before the
+			/// <see cref="AddRules"/> is invoked.
+			/// </summary>
 			PreValidateRules,
 			/// <summary>
-			/// The event handler that actually validates all of the rules is ready to execute. Each rule will have it's Execute method called to validate
-			/// whether or not the rule is satisfied. If it's not a failure will occur and processing will either continue through the other rules or it will
-			/// halt at the first failed rule depending on the 
+			/// The event handler that actually validates all of the rules is ready to execute. Each rule
+			/// will have it's Execute method called to validate whether or not the rule is satisfied. If
+			/// it's not a failure will occur and processing will either continue through the other rules
+			/// or it will halt at the first failed rule depending on the value of the
+			/// <see cref="WorkActionConfiguration.StopRuleProcessingOnFirstFailure"/> property.
+			/// 
+			/// ============================================================================================
+			/// TODO: Implement the logic to halt processing after the first failed rule!
+			/// ============================================================================================
 			/// </summary>
 			/// <remarks>
-			/// There isn't a protected method named "ValidateRules". The code is actually called from the Execute method when the <see cref="WorkValidation"/>
-			/// object's <see cref="WorkValidation.ValidateRules"/> method is called.
+			/// There isn't a protected method named "ValidateRules". The code is actually called from
+			/// the Execute method when the <see cref="WorkValidation"/> object's
+			/// <see cref="WorkValidation.ValidateRules"/> method is called.
 			/// </remarks>
 			ValidateRules,
-			/// <summary>The Event Hndler that runs after <see cref="ValidateRules"/> just before the <see cref="PreProcessAction"/> is invoked.</summary>
-			/// <remarks>This is the first method that is run after the rules have all been validated and passed. If any of the rules fail this method is never invoked.</remarks>
+			/// <summary>The event handler that runs after <see cref="ValidateRules"/> just before the
+			/// <see cref="PreProcessAction"/> is invoked.
+			/// </summary>
+			/// <remarks>
+			/// This is the first method that is run after the rules have all been validated and passed.
+			/// If any of the rules fail this method is never invoked and handles any tasks that need to
+			/// be performed before the <see cref="ProcessAction"/> code can be executed.
+			/// 
+			/// This is the first place in the processing where tasks that would need to be rolled back in
+			/// the case of a failure should be placed. The rules have passed at this point making it a
+			/// logical starting point for performing updates/inserts to any data.
+			/// </remarks>
 			PreProcessAction,
-			/// <summary>The Event Hndler that runs after <see cref="PreProcessAction"/> just before the <see cref="ProcessAction"/> is invoked.</summary>
+			/// <summary>
+			/// The event handler that runs after <see cref="PreProcessAction"/>. This is where the actual
+			/// work is performed, the whole point (subject) of the Unit of Work.
+			/// </summary>
 			ProcessAction,
-			/// <summary>The Event Hndler that runs after <see cref="ProcessAction"/> just before the <see cref="ProcessAction"/> is invoked.</summary>
+			/// <summary>
+			/// The Event Handler that runs after the <see cref="ProcessAction"/> method for any
+			/// post-processing clean up would need to execute. An example would be committing any
+			/// active transaction.
+			/// </summary>
 			PostProcessAction,
-			/// <summary>This handler is only executed if the code has trapped a <see cref="UnitOfWorkException"/>.</summary>
+			/// <summary>
+			/// This handler is only executed if the code has trapped a <see cref="UnitOfWorkException"/>.
+			/// Any other type of exceptions are NOT handled by the underlying <see cref="WorkAction"/>
+			/// base class.
+			/// </summary>
 			ExceptionHandler
 		}
 
 		#region Constructors
 
 		/// <summary>
-		/// Instantializes a new instance of the <see cref="WorkAction" /> class. Allows for object initializer usage.
+		/// Default constructor. Instantializes a new instance of the <see cref="WorkAction" /> class.
+		/// Allows for object initializer usage.
 		/// </summary>
 		protected WorkAction()
 		{
@@ -76,16 +119,15 @@ namespace UOWRulesEngine
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="WorkAction" /> class, using the provided <see cref="IWorkValidation" /> to set the
-		/// WorkValidationContext property.
+		/// Initializes a new instance of the <see cref="WorkAction" /> class, using the provided
+		/// <see cref="IWorkValidation" />.
 		/// </summary>
 		/// <remarks>
-		/// Use this constructor to initialize a new instance of the <see cref="WorkAction" /> class when chaining multiple actions in a single
-		/// service call. This allows all business rules to be executed in the correct order before any work is done in an action. It also allows
-		/// a transaction to be utilized in the logic flow as the <see cref="TransactionScope" /> object is part of the <see cref="WorkValidation" />
-		/// class.
+		/// Use this constructor to initialize a new instance of the <see cref="WorkAction" />
+		/// class when chaining multiple actions in a single service call. This allows all business
+		/// rules to be executed in the correct order before any work is done in an action.
 		/// </remarks>
-		/// <param name="workValidationContext"></param>
+		/// <param name="workValidationContext">A <see cref="WorkValidationContext"/> object.</param>
 		protected WorkAction(IWorkValidation workValidationContext)
 		{
 			Result = WorkActionResult.Unknown;
@@ -94,11 +136,13 @@ namespace UOWRulesEngine
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="WorkAction" /> class, using the provided <see cref="WorkActionConfiguration" /> object to
-		/// provide more fine tuned control over the <see cref="WorkAction" /> and to support performing all work inside of a
-		/// <see cref="TransactionScope" /> when spanning multiple <see cref="WorkAction" />s when needed.
+		/// Initializes a new instance of the <see cref="WorkAction" /> class, using the provided
+		/// <see cref="WorkActionConfiguration" /> object to provide more fine tuned control over
+		/// the <see cref="WorkAction" />.
 		/// </summary>
-		/// <param name="config">An <see cref="WorkActionConfiguration" /> object containing the configuration settings desired.</param>
+		/// <param name="config">
+		/// A <see cref="WorkActionConfiguration" /> object containing the configuration settings.
+		/// </param>
 		protected WorkAction(WorkActionConfiguration config)
 		{
 			Result = WorkActionResult.Unknown;
@@ -106,13 +150,17 @@ namespace UOWRulesEngine
 		}
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="WorkAction" /> class, using the provided <see cref="WorkActionConfiguration" /> object to
-		/// provide more fine tuned control over the <see cref="WorkAction" /> and to support performing all work inside of a
-		/// <see cref="TransactionScope" /> when spanning multiple <see cref="WorkAction" />s when needed, and also the provided
-		/// <see cref="IWorkValidation" /> to set the WorkValidationContext property for chaining actions.
+		/// Initializes a new instance of the <see cref="WorkAction" /> class, using the provided
+		/// <see cref="WorkActionConfiguration" /> object to provide more fine tuned control over
+		/// the <see cref="WorkAction" /> and to support performing all work inside of a
+		/// <see cref="TransactionScope" /> when spanning multiple <see cref="WorkAction" />s when
+		/// needed, and also the provided <see cref="IWorkValidation" /> to set the
+		/// <see cref="WorkValidationContext"/> property for chaining actions.
 		/// </summary>
-		/// <param name="workValidationContext"></param>
-		/// <param name="config"></param>
+		/// <param name="workValidationContext">A <see cref="WorkValidationContext"/> object.</param>
+		/// <param name="config">
+		/// A <see cref="WorkActionConfiguration" /> object containing the configuration settings.
+		/// </param>
 		protected WorkAction(IWorkValidation workValidationContext, WorkActionConfiguration config)
 		{
 			Result = WorkActionResult.Unknown;
@@ -125,7 +173,8 @@ namespace UOWRulesEngine
 		#region Properties
 
 		/// <summary>
-		/// An <see cref="IWorkValidation" /> used to validate the business rules before the action code is executed and report the results.
+		/// An <see cref="IWorkValidation" /> used to validate the business rules before the action
+		/// code is executed and report the results.
 		/// </summary>
 		public IWorkValidation WorkValidationContext { get; private set; }
 		/// <summary>
@@ -133,12 +182,14 @@ namespace UOWRulesEngine
 		/// </summary>
 		public WorkActionResult Result { get; protected set; }
 		/// <summary>
-		/// A <see cref="WorkActionConfiguration" /> object containing various settings for the action's behavior.
+		/// A <see cref="WorkActionConfiguration" /> object containing various settings for the
+		/// action's behavior.
 		/// </summary>
 		public WorkActionConfiguration Configuration { get; set; }
 		/// <summary>
-		/// A <see cref="WorkActionProcessingStage"/> enum representing the current stage of process used to limit some functionality to only
-		/// certain stages. For example, the last chance to stop processing a WorkAction before work is done is the <see cref="ProcessAction"/> method.
+		/// A <see cref="WorkActionProcessingStage"/> enum representing the current stage of process
+		/// used to limit some functionality to only certain stages. For example, the last chance to
+		/// stop processing a WorkAction before work is done is the <see cref="ProcessAction"/> method.
 		/// </summary>
 		public WorkActionProcessingStage ProcessingStage { get; private set; }
 
@@ -147,20 +198,28 @@ namespace UOWRulesEngine
 		#region Public Methods
 
 		/// <summary>
-		/// Executes the <see cref="WorkAction" />.  This is central to the Command pattern as this is the Execute part (the part that is publicly 
-		/// available to actually start the processing of the "command").
+		/// Executes the <see cref="WorkAction" />.  This is central to the Command pattern as this is
+		/// the Execute part (the part that is publicly available to actually start the processing of
+		/// the "command").
 		/// </summary>
 		/// <remarks>
-		/// This is the method exposed by the <see cref="IWorkAction" /> interface (command pattern implementation). The processing of a class that
-		/// implements the <see cref="IWorkAction" /> interface, and that inherits from the <see cref="WorkAction"/> abstract class, begins when the
-		/// calling code executes this nethod. This causes the inherited protected methods in the implementing WorkAction class to be executed in the
-		/// following sequence: 
+		/// This is the method exposed by the <see cref="IWorkAction" /> interface (command pattern
+		/// implementation). The processing of a class that implements the <see cref="IWorkAction" />
+		/// interface, and that inherits from the <see cref="WorkAction"/> abstract class, begins when
+		/// the calling code executes this nethod. This causes the inherited protected methods in the
+		/// implementing WorkAction class to be executed in the following sequence:
+		/// 
+		/// =======================================================================================================
+		/// TODO: Fix this ordering so that implementers know what happens in which order. The "event model"...
 		/// The code that gets called behind the scenes is the ProcessAction protected method.
-		/// This is the method exposed by the <see cref="IWorkAction" /> interface. Processing starts by calling the <see cref="AddRules(IList&lt;IWorkRule&gt;)"/>
-		/// method implemented in the classes that inherit from <see cref="WorkAction" /> to get all
-		/// of the business rules (<see cref="WorkRule" /> objects), execute (Validate) them, then execute all of the protected event methods <see cref="PreProcessAction()" />,
-		/// <see cref="ProcessAction()" /> (which runs the logic to perform the action) and the <see cref="PostProcessAction()" /> to perform all of
-		/// the work of the business action.  Finally <see cref="VerifyAction()" /> is called to set the <see cref="Result" /> property value.
+		/// This is the method exposed by the <see cref="IWorkAction" /> interface. Processing starts by
+		/// calling the <see cref="AddRules(IList&lt;IWorkRule&gt;)"/> method implemented in the classes
+		/// that inherit from <see cref="WorkAction" /> to get all of the business rules (<see cref="WorkRule" />
+		/// objects), execute (Validate) them, then execute all of the protected event methods
+		/// <see cref="PreProcessAction()" />, <see cref="ProcessAction()" /> (which runs the logic to perform the
+		/// action) and the <see cref="PostProcessAction()" /> to perform all of the work of the business action.
+		/// Finally <see cref="VerifyAction()" /> is called to set the <see cref="Result" /> property value.
+		/// =======================================================================================================
 		/// </remarks>
 		public void Execute()
 		{
@@ -173,13 +232,96 @@ namespace UOWRulesEngine
 
 				ProcessingStage = WorkActionProcessingStage.AddRules;
 
-				// Add all of the business rules to the WorkValidation.Rules collection so that we can check them before performing the action
+				// Add all of the business rules to the WorkValidation.Rules collection so that we can
+				// check them before performing the action
 				AddRules(WorkValidationContext.Rules);
 
 				ProcessingStage = WorkActionProcessingStage.PreValidateRules;
 
 				// Run any code that needs to run before the rules collection is validated.
 				PreValidateRules();
+
+				ProcessingStage = WorkActionProcessingStage.ValidateRules;
+
+				// Execute all of the rules to make sure we can run the action
+				((WorkValidation)WorkValidationContext).ValidateRules();
+
+				// If validation failed return
+				if (WorkValidationContext.IsValid == false)
+				{
+					Result = WorkActionResult.Fail;
+					return;
+				}
+
+				ProcessingStage = WorkActionProcessingStage.PreProcessAction;
+
+				// Run any pre-processing code
+				PreProcessAction();
+
+				ProcessingStage = WorkActionProcessingStage.ProcessAction;
+
+				// If the rules checked out then go ahead and execute the action itself
+				ProcessAction();
+
+				ProcessingStage = WorkActionProcessingStage.PostProcessAction;
+
+				// Run any post-processing code
+				PostProcessAction();
+
+				// Verify that the action succeeded by setting the Result property to a WorkActionResult
+				// value.
+				Result = VerifyAction();
+			}
+			catch (UnitOfWorkException exc)
+			{
+				ProcessingStage = WorkActionProcessingStage.ExceptionHandler;
+
+				// Something went wrong somewhere between the business logic and the repository layer
+				// so report it in the results.
+				// If the current configuration says to just add the exception messages to the results
+				// then go ahead.
+				if (Configuration.UseExceptionMessageDuringExceptionHandling)
+				{
+					AddThrownExceptionRuleToResults(exc);
+					return;
+				}
+
+				// The exception is marked as having a Message that is potentially not appropriate
+				// for display so add a generic message.
+				var exceptionRule = new ThrownExceptionRule(
+					"HandledExceptionRule", "An exception occurred while processing request.", exc);
+				exceptionRule.Verify();
+
+				WorkValidationContext.Results.Add(new WorkResult(exceptionRule));
+			}
+		}
+
+		/// <summary>
+		/// Executes the WorkAction asynchronously so that it can handle long-running tasks and also
+		/// be executed on a background worker thread when using QueueBackgroundWorkItem or other
+		/// threading functionality.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> (void).</returns>
+		/// <see cref="Execute"/>
+		public async Task ExecuteAsync()
+		{
+			try
+			{
+				ProcessingStage = WorkActionProcessingStage.PreAddRules;
+
+				// Run any code needed before adding the rules to the collection.
+				await PreAddRulesAsync();
+
+				ProcessingStage = WorkActionProcessingStage.AddRules;
+
+				// Add all of the business rules to the WorkValidation.Rules collection so that we can check
+				// them before performing the action.
+				await AddRulesAsync(WorkValidationContext.Rules);
+
+				ProcessingStage = WorkActionProcessingStage.PreValidateRules;
+
+				// Run any code that needs to run before the rules collection is validated.
+				await PreValidateRulesAsync();
 
 				ProcessingStage = WorkActionProcessingStage.ValidateRules;
 
@@ -215,16 +357,20 @@ namespace UOWRulesEngine
 			{
 				ProcessingStage = WorkActionProcessingStage.ExceptionHandler;
 
-				//Something went wrong somewhere between the business logic and the repository layer so report it in the results
-				//If the current configuration says to just add the exception messages to the results then go ahead
+				// Something went wrong somewhere between the business logic and the repository layer so report
+				// it in the results.
+				// If the current configuration says to just add the exception messages to the results then go
+				// ahead.
 				if (Configuration.UseExceptionMessageDuringExceptionHandling)
 				{
 					AddThrownExceptionRuleToResults(exc);
 					return;
 				}
 
-				//The exception is marked as having a Message that is potentially not appropriate for display so add a generic message
-				var exceptionRule = new ThrownExceptionRule("HandledExceptionRule", "An exception occurred while processing request.", exc);
+				// The exception is marked as having a Message that is potentially not appropriate for display
+				// so add a generic message.
+				var exceptionRule = new ThrownExceptionRule(
+					"HandledExceptionRule", "An exception occurred while processing request.", exc);
 				exceptionRule.Verify();
 
 				WorkValidationContext.Results.Add(new WorkResult(exceptionRule));
@@ -236,64 +382,168 @@ namespace UOWRulesEngine
 		#region Protected Methods
 
 		/// <summary>
-		/// This is the method to override if there is any code that needs to be executed before the rules are added to the collection. An example would be if data
-		/// needed to be gathered or prepared in oroder to properly check the rules.
+		/// This is the method to override if there is any code that needs to be executed before the rules are
+		/// added to the collection. An example would be if data needed to be gathered or prepared in oroder to
+		/// properly check the rules.
 		/// </summary>
 		protected virtual void PreAddRules()
 		{
 		}
 
 		/// <summary>
-		/// This is the method to override to add all of the business rules to the process. All business rules will be added to the 
-		/// <see cref="IWorkValidation.Rules" /> property so that they can be executed when the action is run to validate that the action
-		/// can be performed.
+		/// Asynchronous version of the <see cref="PreAddRules"/> method.
+		/// 
+		/// This is the method to override if there is any code that needs to be executed before the rules are
+		/// added to the collection. An example would be if data needed to be gathered or prepared in oroder to
+		/// properly check the rules.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> (void).</returns>
+		/// <see cref="PreAddRules"/>
+		protected virtual async Task PreAddRulesAsync()
+		{
+			await Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// This is the method to override to add all of the business rules to the process. All business
+		/// rules will be added to the <see cref="IWorkValidation.Rules" /> property so that they can be
+		/// executed when the action is run to validate that the action can be performed.
 		/// </summary>
 		protected virtual void AddRules(IList<IWorkRule> rules)
 		{
 		}
 
 		/// <summary>
-		/// This is the method to override if there is more work to be done to complete the rules check or to prepare data, etc. before the WorkAction's work
-		/// can be completed.
+		/// Asynchronous version of the <see cref="AddRules(IList{IWorkRule})"/> method.
+		/// 
+		/// This is the method to override to add all of the business rules to the process. All business
+		/// rules will be added to the <see cref="IWorkValidation.Rules" /> property so that they can be
+		/// executed when the action is run to validate that the action can be performed.
 		/// </summary>
-		protected virtual void PreValidateRules()
+		/// <param name="rules">An <see cref="IList{T}"/> of <see cref="IWorkRule"/> objects.</param>
+		/// <returns>A <see cref="Task"/> (void).</returns>
+		/// <see cref="AddRules(IList{IWorkRule})"/>
+		protected virtual async Task AddRulesAsync(IList<IWorkRule> rules)
 		{
-
+			await Task.CompletedTask;
 		}
 
 		/// <summary>
-		/// Override this method to add any pre-processing actions you need to run before the actual action code is executed. Trace and logging
-		/// code would be added here for example.
+		/// This is the method to override if there is more work to be done to complete the rules check or
+		/// to prepare data, etc. before the WorkAction's work can be completed.
+		/// </summary>
+		protected virtual void PreValidateRules()
+		{
+		}
+
+		/// <summary>
+		/// Asynchronous version of the <see cref="PreValidateRules"/> method.
+		/// 
+		/// This is the method to override if there is more work to be done to complete the rules check
+		/// or to prepare data, etc. before the WorkAction's work can be completed.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> (void).</returns>
+		/// <see cref="PreValidateRules"/>
+		protected virtual async Task PreValidateRulesAsync()
+		{
+			await Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// Override this method to add any pre-processing actions you need to run before the actual
+		/// action code is executed. Trace and logging code would be added here for example.
 		/// </summary>
 		protected virtual void PreProcessAction()
 		{
 		}
 
 		/// <summary>
-		/// This is what needs to be overridden in derived classes in order to perform the action's tasks.  This is the actual work done.
+		/// Asynchronous version of the <see cref="PreProcessAction"/> method.
+		/// 
+		/// Override this method to add any pre-processing actions you need to run before the actual
+		/// action code is executed. Trace and logging code would be added here for example.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> (void).</returns>
+		/// <see cref="PreProcessAction"/>
+		protected virtual async Task PreProcessActionAsync()
+		{
+			await Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// This is what needs to be overridden in derived classes in order to perform the action's
+		/// tasks.  This is the actual work done.
 		/// </summary>
 		protected virtual void ProcessAction()
 		{
 		}
 
 		/// <summary>
-		/// Override this method to add any post-processing actions you need to run after the actual action code is executed. Trace and logging
-		/// code would be added here for example. Also, if any UnitOfWorkException exceptions were handled you could access those here and do processing
-		/// on them. The <see cref="WorkActionConfiguration" /> allows you to select automatic exception handling, which essentially adds the exception
-		/// Message property to a 
+		/// Asynchronous version of the <see cref="ProcessAction"/> method.
+		/// 
+		/// This is what needs to be overridden in derived classes in order to perform the action's
+		/// tasks.  This is the actual work done.
+		/// </summary>
+		/// <returns>A <see cref="Task"/> (void).</returns>
+		/// <see cref="ProcessAction"/>
+		protected virtual async Task ProcessActionAsync()
+		{
+			await Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// Override this method to add any post-processing actions you need to run after the actual
+		/// action code is executed. Tracing and logging code would be added here for example. Also,
+		/// if any UnitOfWorkException exceptions were handled you could access those here and do
+		/// processing on them. The <see cref="WorkActionConfiguration" /> allows you to select
+		/// automatic exception handling, which essentially adds the exception Message property to a
+		/// failed <see cref="IWorkRule"/> object and adds it to the list of rules for the calling code
+		/// to report to the end user.
 		/// </summary>
 		protected virtual void PostProcessAction()
 		{
 		}
 
 		/// <summary>
-		/// This is the code to override when you need the action to return a success/fail value. It checks that the work of the action was
-		/// actually completed successfully once the work is performed.
+		/// Asynchronous version of the <see cref="PostProcessAction"/> method.
+		/// 
+		/// Override this method to add any post-processing actions you need to run after the actual
+		/// action code is executed. Tracing and logging code would be added here for example. Also,
+		/// if any UnitOfWorkException exceptions were handled you could access those here and do
+		/// processing on them. The <see cref="WorkActionConfiguration" /> allows you to select
+		/// automatic exception handling, which essentially adds the exception Message property to a
+		/// failed <see cref="IWorkRule"/> object and adds it to the list of rules for the calling code
+		/// to report to the end user.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>A <see cref="Task"/> (void).</returns>
+		/// <see cref="PostProcessAction"/>
+		protected virtual async Task PostProcessActionAsync()
+		{
+			await Task.CompletedTask;
+		}
+
+		/// <summary>
+		/// This is the code to override when you need the action to return a success/fail value. It
+		/// checks that the work of the action was actually completed successfully once the work is
+		/// performed.
+		/// </summary>
+		/// <returns>A <see cref="WorkActionResult"/> with the results of the operation.</returns>
 		protected virtual WorkActionResult VerifyAction()
 		{
 			return Result;
+		}
+
+		/// <summary>
+		/// Asynchronous version of the <see cref="VerifyAction"/> method.
+		/// 
+		/// This is the code to override when you need the action to return a success/fail value. It checks that the work of the action was
+		/// actually completed successfully once the work is performed.
+		/// </summary>
+		/// <returns>A <see cref="Task{TResult}"/> of <see cref="WorkActionResult"/>.</returns>
+		/// <see cref="PreValidateRules"/>
+		protected virtual async Task<WorkActionResult> VerifyActionAsync()
+		{
+			return await Task.FromResult(WorkActionResult.Success);
 		}
 
 		/// <summary>

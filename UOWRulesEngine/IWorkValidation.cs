@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Transactions;
 
 namespace UOWRulesEngine
 {
@@ -24,15 +25,17 @@ namespace UOWRulesEngine
 	/// </remarks>
 	public interface IWorkValidation
 	{
-		/// <inheritdoc cref="WorkValidation.IsValid" select="summary"/>
+		/// <inheritdoc cref="WorkValidation.TransactionContext" path="*"/>
+		TransactionScope TransactionContext { get; set; }
+		/// <inheritdoc cref="WorkValidation.IsValid" path="*"/>
 		bool IsValid { get; }
-		/// <inheritdoc cref="WorkValidation.Rules" select="summary"/>
+		/// <inheritdoc cref="WorkValidation.Rules" path="*"/>
 		IList<IWorkRule> Rules { get; set; }
-		/// <inheritdoc cref="WorkValidation.Results" select="summary"/>
+		/// <inheritdoc cref="WorkValidation.Results" path="*"/>
 		IList<IWorkResult> Results { get; }
-		/// <inheritdoc cref="WorkValidation.FailedResults" select="summary"/>
+		/// <inheritdoc cref="WorkValidation.FailedResults" path="*"/>
 		IList<IWorkResult> FailedResults { get; }
-		/// <inheritdoc cref="WorkValidation.PassedResults" select="summary"/>
+		/// <inheritdoc cref="WorkValidation.PassedResults" path="*"/>
 		IList<IWorkResult> PassedResults { get; }
 	}
 }

@@ -1,4 +1,6 @@
-﻿namespace UOWRulesEngine
+﻿using System;
+
+namespace UOWRulesEngine
 {
 	/// <summary>
 	/// The abstract base class for the <see cref="WorkRule" /> abstract class.
@@ -24,14 +26,24 @@
 
 		/// <summary>
 		/// Initializes a new instance of the RuleComponent class. This is the base class for the <see cref="WorkRule" /> class and allows custom rules to be
-		/// created by inheriting from <see cref="WorkRule" /> then overriding the <see cref="RuleComponent.Verify"/> method to implement the business
+		/// created by inheriting from <see cref="WorkRule" /> then overriding the <see cref="Verify"/> method to implement the business
 		/// rule logic. These rules are then executed by the <see cref="IWorkAction"/> during it's processing pipeline before any work is actually
-		/// started.  If the logic in these rules does not pass, the action's processing code is never executed.
+		/// started.  If the logic in these rules does not pass, the action's processing code is never executed and the failed rules can be examined by the
+		/// calling process to determine where the problem lies.
 		/// </summary>
 		/// <param name="name">A string containing the name of the business rule.</param>
 		/// <param name="message">A string containing the message that the calling code will display if the business rule fails.</param>
 		protected RuleComponent(string name, string message)
 		{
+			if (string.IsNullOrEmpty(name.Trim()))
+			{
+				throw (new ArgumentNullException("name"));
+			}
+			if (string.IsNullOrEmpty(message.Trim()))
+			{
+				throw (new ArgumentNullException("name"));
+			}
+
 			Name = name;
 			Message = message;
 		}
@@ -89,7 +101,7 @@
 		/// <![CDATA[
 		/// public override IWorkResult Verify()
 		/// {
-		/// 	IsValid = target.IsNullEmptyWhiteSpace() == false && target.Length == 9;
+		/// 	IsValid = string.IsNullOrEmpty(target) == false && target.Length == 9;
 		/// 	return new WorkResult(this);
 		/// }
 		/// ]]>

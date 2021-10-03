@@ -1,4 +1,6 @@
-﻿namespace UOWRulesEngine
+﻿using System;
+
+namespace UOWRulesEngine
 {
 	/// <summary>
 	/// Contains the properties needed to report failures in business rules for a <see cref="WorkAction" />.
@@ -23,7 +25,8 @@
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="WorkResult" /> object. Ensures object initializers can be used with this object.
+		/// Default constructor. Initializes a new instance of the <see cref="WorkResult"/> class.
+		/// Empty constructor that ensures object initializers can be used with this object.
 		/// </summary>
 		public WorkResult()
 		{
@@ -44,18 +47,40 @@
 
 		#region Properties
 
-		/// <summary>
-		/// A string property containing the name of the business rule.
-		/// </summary>
+		/// <inheritdoc cref="IWorkResult.Name" path="summary"/>
 		public string Name { get; set; }
-		/// <summary>
-		/// A string property containing the message that describes why the business rule failed, or what conditions needed to be met for the rule to pass.
-		/// </summary>
+		/// <inheritdoc cref="IWorkResult.Message" path="summary"/>
 		public string Message { get; set; }
-		/// <summary>
-		/// A bool field indicating whether the business rule passed or failed.
-		/// </summary>
+		/// <inheritdoc cref="IWorkResult.IsValid" path="summary"/>
 		public bool IsValid { get; set; }
+
+		#endregion
+
+		#region Fluent Methods.
+
+		/// <inheritdoc cref="IWorkResult.SetName(string)" path="*"/>
+		public WorkResult SetName(string value)
+		{
+			if (string.IsNullOrEmpty(value.Trim()))
+			{
+				throw new ArgumentNullException("value");
+			}
+
+			Name = value;
+			return this;
+		}
+
+		/// <inheritdoc cref="IWorkResult.SetMessage(string)" path="*"/>
+		public WorkResult SetMessage(string value)
+		{
+			if (string.IsNullOrEmpty(value.Trim()))
+			{
+				throw new ArgumentNullException("value");
+			}
+
+			Message = value;
+			return this;
+		}
 
 		#endregion
 	}

@@ -18,11 +18,35 @@
 	/// </remarks>
 	public interface IWorkResult
 	{
-		/// <inheritdoc cref="WorkResult.Name" select="summary"/>
+		/// <summary>
+		/// A string property containing the name of the business rule.
+		/// </summary>
 		string Name { get; set; }
-		/// <inheritdoc cref="WorkResult.Message" select="summary"/>
+		/// <summary>
+		/// A string property containing the message that describes why the business rule failed, or what conditions needed to be met for the rule to pass.
+		/// </summary>
 		string Message { get; set; }
-		/// <inheritdoc cref="WorkResult.IsValid" select="summary"/>
+		/// <summary>
+		/// A bool field indicating whether the business rule passed or failed.
+		/// </summary>
 		bool IsValid { get; set; }
+
+		/// <summary>
+		/// Fluent method definition to set the <see cref="Name"/> property.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns>
+		/// The current <see cref="WorkResult"/> object reference for this object (this) so that other Fluent methods can be chained.
+		/// </returns>
+		WorkResult SetName(string value);
+
+		/// <summary>
+		/// Fluent method definition to set the <see cref="Message"/> property.
+		/// </summary>
+		/// <param name="value">A string value used to set the <see cref="Message"/> property.</param>
+		/// <returns>
+		/// The current <see cref="WorkResult"/> object reference for this object (this) so that other Fluent methods can be chained.
+		/// </returns>
+		WorkResult SetMessage(string value);
 	}
 }
