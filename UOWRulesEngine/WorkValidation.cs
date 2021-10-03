@@ -35,7 +35,7 @@ namespace UOWRulesEngine
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="WorkValidation" /> class. Allows for object initializer usage.
+		/// Default constructor. Instantiates a new <see cref="WorkValidation"/> object.
 		/// </summary>
 		/// <remarks>
 		/// The WorkValidation class is the main component for validating a <see cref="WorkAction" /> call and reporting the results to calling code.
@@ -68,47 +68,27 @@ namespace UOWRulesEngine
 
 		#region Properties
 
-		/// <summary>
-		/// A bool value that is used to determine if all of the business rules are valid and the action can proceed.
-		/// </summary>
+		/// <inheritdoc cref="IWorkValidation.IsValid" path="*"/>
 		public bool IsValid { get { return Results.All(x => x.IsValid); } }
-		/// <summary>
-		/// An IList&lt;<see cref="WorkRule" />&gt; collection containing all of the business rules that have to succeed before a <see cref="WorkAction" />
-		/// can be executed.
-		/// </summary>
+		/// <inheritdoc cref="IWorkValidation.Rules" path="*"/>
 		public IList<IWorkRule> Rules { get; set; }
-		/// <summary>
-		/// An IList&lt;<see cref="WorkResult" />&gt; collection containing the results of each of the <see cref="WorkRule" /> objects executed to validate
-		/// the business rules for a <see cref="WorkAction" />.
-		/// </summary>
+		/// <inheritdoc cref="IWorkValidation.Results" path="*"/>
 		public IList<IWorkResult> Results { get; private set; }
 
-		/// <summary>
-		/// Returns only the <see cref="WorkResult" /> objects for rules that failed.
-		/// </summary>
+		/// <inheritdoc cref="IWorkValidation.FailedResults" path="*"/>
 		public IList<IWorkResult> FailedResults
 		{
 			get { return Results.Where(x => x.IsValid == false).ToList(); }
 		}
-		
-		/// <summary>
-		/// Used to run the <see cref="WorkAction" /> in a transaction when running multiple actions together.
-		/// </summary>
-		/// <remarks>
-		/// If only 1 action is being executed there is no reason to have a <see cref="TransactionScope" /> as no work is performed if any of the 
-		/// business rules fail unless multiple changes are being made by a single action. For instance, if you are updating multiple rows of data 
-		/// in a single action you could use the scope to handle rolling back changes if any of the steps fail. But this is handled by the method
-		/// override and as such the developer already has full control over the rollback capabilities of the action.
-		/// </remarks>
-		public TransactionScope TransactionContext { get; set; }
 
-		/// <summary>
-		/// Returns only the <see cref="WorkResult" /> objects for rules that passed.
-		/// </summary>
+		/// <inheritdoc cref="IWorkValidation.PassedResults" path="*"/>
 		public IList<IWorkResult> PassedResults
 		{
 			get { return Results.Where(x => x.IsValid).ToList(); }
 		}
+
+		/// <inheritdoc cref="IWorkValidation.TransactionContext" path="*"/>
+		public TransactionScope TransactionContext { get; set; }
 
 		//TODO: Add another collection for warning results if we need them later.
 

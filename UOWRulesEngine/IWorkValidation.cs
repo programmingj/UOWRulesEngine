@@ -25,17 +25,37 @@ namespace UOWRulesEngine
 	/// </remarks>
 	public interface IWorkValidation
 	{
-		/// <inheritdoc cref="WorkValidation.TransactionContext" path="*"/>
-		TransactionScope TransactionContext { get; set; }
-		/// <inheritdoc cref="WorkValidation.IsValid" path="*"/>
+		/// <summary>
+		/// A bool value that is used to determine if all of the business rules are valid and the action can proceed.
+		/// </summary>
 		bool IsValid { get; }
-		/// <inheritdoc cref="WorkValidation.Rules" path="*"/>
+		/// <summary>
+		/// An IList&lt;<see cref="WorkRule" />&gt; collection containing all of the business rules that have to succeed before a <see cref="WorkAction" />
+		/// can be executed.
+		/// </summary>
 		IList<IWorkRule> Rules { get; set; }
-		/// <inheritdoc cref="WorkValidation.Results" path="*"/>
+		/// <summary>
+		/// An IList&lt;<see cref="WorkResult" />&gt; collection containing the results of each of the <see cref="WorkRule" /> objects executed to validate
+		/// the business rules for a <see cref="WorkAction" />.
+		/// </summary>
 		IList<IWorkResult> Results { get; }
-		/// <inheritdoc cref="WorkValidation.FailedResults" path="*"/>
+		/// <summary>
+		/// Returns only the <see cref="WorkResult" /> objects for rules that failed.
+		/// </summary>
 		IList<IWorkResult> FailedResults { get; }
-		/// <inheritdoc cref="WorkValidation.PassedResults" path="*"/>
+		/// <summary>
+		/// Returns only the <see cref="WorkResult" /> objects for rules that passed.
+		/// </summary>
 		IList<IWorkResult> PassedResults { get; }
+		/// <summary>
+		/// Used to run the <see cref="WorkAction" /> in a transaction when running multiple actions together.
+		/// </summary>
+		/// <remarks>
+		/// If only 1 action is being executed there is no reason to have a <see cref="TransactionScope" /> as no work is performed if any of the 
+		/// business rules fail unless multiple changes are being made by a single action. For instance, if you are updating multiple rows of data 
+		/// in a single action you could use the scope to handle rolling back changes if any of the steps fail. But this is handled by the method
+		/// override and as such the developer already has full control over the rollback capabilities of the action.
+		/// </remarks>
+		TransactionScope TransactionContext { get; set; }
 	}
 }
