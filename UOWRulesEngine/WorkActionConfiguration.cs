@@ -3,22 +3,6 @@
 namespace UOWRulesEngine
 {
 	/// <summary>
-	/// The results of an <see cref="IWorkAction" /> execution.
-	/// </summary>
-	public enum WorkActionResult
-	{
-		/// <summary>The WorkAction completed it's task successfully.</summary>
-		Success,
-		/// <summary>
-		/// The WorkAction either has failing rule(s) or an Exception was thrown and a failed rule was added to the Rules
-		/// collection with the exception information.
-		/// </summary>
-		Fail,
-		/// <summary>The WorkAction either has not been executed yet or is currently running.</summary>
-		Unknown
-	}
-
-	/// <summary>
 	/// Contains properties for the various options available. For example the StopRuleProcessingOnFirstFailure property determines whether all rules
 	/// in the collection will be processed for a WorkAction, or if rule validation stops on the first failed rule encountered.
 	/// </summary>
@@ -58,7 +42,7 @@ namespace UOWRulesEngine
 		/// WorkAction it belongs to. If false rule processing will continue until all rules have been validated so that all problems can be
 		/// reported back to the calling code.
 		/// </summary>
-		public bool StopRuleProcessingOnFirstFailure { get; set; }
+		public bool StopRuleProcessingOnFirstFailure { get; set; }                 
 
 		#endregion
 	}

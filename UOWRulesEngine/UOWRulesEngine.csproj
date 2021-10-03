@@ -44,7 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FailureOutsideMainProcessRule.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="Rules\FailureOutsideMainProcessRule.cs" />
     <Compile Include="IWorkAction.cs" />
     <Compile Include="IWorkResult.cs" />
     <Compile Include="IWorkRule.cs" />
@@ -55,7 +56,7 @@
     <Compile Include="Rules\NullRule.cs" />
     <Compile Include="Rules\ValueTypesAreEqualRule.cs" />
     <Compile Include="Rules\ValueTypesAreNotEqualRule.cs" />
-    <Compile Include="ThrownExceptionRule.cs" />
+    <Compile Include="Rules\ThrownExceptionRule.cs" />
     <Compile Include="UnitOfWorkException.cs" />
     <Compile Include="UOWAttributeBase.cs" />
     <Compile Include="WorkAction.cs" />

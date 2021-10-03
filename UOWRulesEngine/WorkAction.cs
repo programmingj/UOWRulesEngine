@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Transactions;
+using UOWRulesEngine.Rules;
+using static UOWRulesEngine.Enums;
 
 namespace UOWRulesEngine
 {

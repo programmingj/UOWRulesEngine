@@ -1,4 +1,6 @@
-﻿namespace UOWRulesEngine
+﻿using static UOWRulesEngine.Enums;
+
+namespace UOWRulesEngine
 {
 	/// <summary>
 	/// Exposes the Execute() method following the Command pattern to work with <see cref="WorkAction" /> objects containing the logic for the action

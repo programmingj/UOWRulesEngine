@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UOWRulesEngine
+namespace UOWRulesEngine.Rules
 {
 	/// <summary>
 	/// Used to add a failed rule to the rules collection when an exception has been trapped
@@ -17,7 +17,7 @@ namespace UOWRulesEngine
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="ThrownExceptionRule" />
+		/// Default constructor. Instantiates a new <see cref="ThrownExceptionRule"/> object.
 		/// </summary>
 		/// <param name="name">The name of the rule.</param>
 		/// <param name="message">The error message to be displayed.</param>
@@ -30,17 +30,21 @@ namespace UOWRulesEngine
 
 		#endregion
 
-		#region Cores
+		#region Public methods.
 
 		/// <summary>
-		/// Verify the rule is satisfied
+		/// Verify the rule is satisfied.
 		/// </summary>
+		/// <remarks>
+		/// This is a special type of rule that is used to report back a trapped exception to the calling code.
+		/// The logic here reflects that situation by simply setting IsValid to false.
+		/// </remarks>
 		public override IWorkResult Verify()
 		{
-			IsValid = target == null;
+			IsValid = false;
 			return new WorkResult(this);
 		}
 
-		#endregion
+		#endregion // End Public Methods.
 	}
 }
