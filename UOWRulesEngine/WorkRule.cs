@@ -16,7 +16,7 @@
 	/// <seealso cref="WorkAction">WorkAction Class</seealso>
 	/// <seealso cref="IWorkResult">IWorkResult Interface</seealso>
 	/// <seealso cref="WorkResult">WorkResult Class</seealso>
-	public abstract class WorkRule : RuleComponent
+	public abstract class WorkRule : RuleComponent, IWorkRule
 	{
 		#region Constructors
 

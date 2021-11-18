@@ -19,6 +19,9 @@ namespace UOWRulesEngine
 		{
 			Transaction = transaction;
 			UseExceptionMessageDuringExceptionHandling = true;
+
+			// Set the default value for the generic error message to use when the UseExceptionMessageDuringExceptionHandling is false.
+			GenericExceptionMessageForThrownExceptionRule = Constants.GENERIC_EXCEPTION_MESSAGE;
 		}
 
 		#endregion
@@ -38,11 +41,16 @@ namespace UOWRulesEngine
 		public bool UseExceptionMessageDuringExceptionHandling { get; set; }
 
 		/// <summary>
+		/// The generic error message to use for exceptions that happen after the <see cref="WorkRule"/> objects have all been validated.
+		/// </summary>
+		public string GenericExceptionMessageForThrownExceptionRule { get; set; }
+
+		/// <summary>
 		/// When this property is true the rule validation routine will stop on the first failed rule encountered and return execution to the
 		/// WorkAction it belongs to. If false rule processing will continue until all rules have been validated so that all problems can be
 		/// reported back to the calling code.
 		/// </summary>
-		public bool StopRuleProcessingOnFirstFailure { get; set; }                 
+		public bool StopRuleProcessingOnFirstFailure { get; set; }             
 
 		#endregion
 	}

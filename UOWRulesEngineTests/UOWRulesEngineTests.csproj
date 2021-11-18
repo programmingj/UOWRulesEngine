@@ -4,6 +4,14 @@
     <TargetFramework>net5.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <Nullable>disable</Nullable>
+
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+
+    <DocumentationFile></DocumentationFile>
+
+    <BaseOutputPath></BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +26,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UOWRulesEngine\UOWRulesEngine.csproj" />
   </ItemGroup>
 
 </Project>

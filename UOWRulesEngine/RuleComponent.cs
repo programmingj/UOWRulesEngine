@@ -56,10 +56,12 @@ namespace UOWRulesEngine
 		/// The Name of the rule. Used by implementing code when a rule fails.
 		/// </summary>
 		public string Name { get; set; }
+
 		/// <summary>
 		/// The rule failure Message that will be used by the implementing code if the rule fails.
 		/// </summary>
 		public string Message { get; set; }
+
 		/// <summary>
 		/// The flag that determines if the rule has passed verification. Set when the rule is executed ( Verify is executed from Execute() ).
 		/// </summary>

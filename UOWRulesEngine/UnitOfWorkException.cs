@@ -27,13 +27,14 @@ namespace UOWRulesEngine
 		#region Constructors
 
 		/// <inheritdoc cref="Exception(string)" path=""/>
-		public UnitOfWorkException(string message) : base(message)
+		public UnitOfWorkException (string message)
+			: base (message)
 		{
 		}
 
-		/// <inheritdoc cref="Exception(string, Exception)" path="*"/>
-		public UnitOfWorkException(string message, Exception innerException)
-			: base(message, innerException)
+		/// <inheritdoc cref="Exception (string, Exception)" path="*"/>
+		public UnitOfWorkException (string message, Exception innerException)
+			: base (message, innerException)
 		{
 		}
 
@@ -42,11 +43,31 @@ namespace UOWRulesEngine
 		#region Properties
 
 		/// <summary>
-		/// Determines if an exception that inherits UnitOfWorkException has a Message property that is appropriate for display in the work action
-		/// error handling. If this is set to true then the <see cref="WorkAction" /> error handler will use the Message property by default when
-		/// building the error rule message.
+		/// Determines if an exception that inherits <see cref="UnitOfWorkException"/> has a Message property that is appropriate for display in
+		/// the <see cref="WorkAction"/> and <see cref="WorkActionAsync"/> error handling. If this is set to true then the <see cref="WorkAction"/>
+		/// and <see cref="WorkActionAsync"/> error handlers will use the Message property when building the error rule message.
 		/// </summary>
-		public bool UseExceptionMessageDuringExceptionHandling { get; set; }
+		/// <remarks>
+		/// This properties value, when not null, will override the <see cref="WorkActionConfiguration.UseExceptionMessageDuringExceptionHandling"/>
+		/// property's value. If this property is null the system will default to using the value from the
+		/// <see cref="WorkActionConfiguration.UseExceptionMessageDuringExceptionHandling"/> property.
+		/// </remarks>
+		public bool? UseExceptionMessageDuringExceptionHandling { get; set; }
+
+		#endregion
+
+		#region Fluid Method Definitions
+
+		/// <summary>
+		/// Fluid method used to set the <see cref="UseExceptionMessageDuringExceptionHandling"/> property value.
+		/// </summary>
+		/// <param name="value"></param>
+		/// <returns></returns>
+		public UnitOfWorkException SetUseExceptionMessageDuringExceptionHandling(bool? value)
+        {
+			UseExceptionMessageDuringExceptionHandling = value;
+			return this;
+        }
 
 		#endregion
 	}

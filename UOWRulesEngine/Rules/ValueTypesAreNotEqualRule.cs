@@ -46,8 +46,8 @@ namespace UOWRulesEngine.Rules
         public string RuleName { get; private set; }
 
         /// <summary>
-        /// Tests that value1's value is not equal to value2's value during the
-        /// <see cref="WorkAction.WorkActionProcessingStage.ValidateRules"/> processing stage.
+        /// Tests that value1's value is not equal to value2's value during the 
+        /// <see cref="Enums.WorkActionProcessingStage.ValidateRules"/> processing stage.
         /// </summary>
         /// <returns>An <see cref="IWorkResult"/> value representing pass or fail or the rule.</returns>
         public override IWorkResult Verify()

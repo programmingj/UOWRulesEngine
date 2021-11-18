@@ -42,7 +42,7 @@ namespace UOWRulesEngine.Rules
 
         /// <summary>
         /// Tests that the target object's value is not null during the
-        /// <see cref="WorkAction.WorkActionProcessingStage.ValidateRules"/> processing stage.
+        /// <see cref="Enums.WorkActionProcessingStage.ValidateRules"/> processing stage.
         /// </summary>
         /// <returns>An <see cref="IWorkResult"/> value representing pass or fail or the rule.</returns>
         public override IWorkResult Verify()

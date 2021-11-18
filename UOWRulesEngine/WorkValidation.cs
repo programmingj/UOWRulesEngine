@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Transactions;
 
 namespace UOWRulesEngine
 {
@@ -54,24 +53,50 @@ namespace UOWRulesEngine
 		{
 			Rules = new List<IWorkRule>();
 			Results = new List<IWorkResult>();
+			Configuration = new WorkActionConfiguration();
 		}
 
-		/// <inheritdoc cref="WorkValidation()" select="summary|remarks"/>
-		public WorkValidation(TransactionScope transactionContext)
+		/// <summary>
+		/// Constructor overload. Instantiates a new <see cref="WorkValidation"/> object.
+		/// </summary>
+		/// <remarks>
+		/// The WorkValidation class is the main component for validating a <see cref="WorkAction" /> call and reporting the results to calling code.
+		/// The <see cref="WorkAction" /> either instantiates a new WorkValidation object in it's constructor or uses one provided to it's constructor
+		/// so that multiple <see cref="WorkAction" /> tasks can be chained together.
+		/// 
+		/// The <see cref="WorkAction" /> then adds rules to the Rules collection via the <see cref="WorkAction.AddRules(IList&lt;IWorkRule&gt;)"/> method
+		/// overridden in the child class for the action being executed. Each of those <see cref="WorkRule" /> objects is then executed via their
+		/// <see cref="IWorkRule.Execute()" /> (command pattern) to ensure business rules are validated. This process adds a <see cref="WorkResult" />
+		/// object to the Results collection for each business rule executed.
+		/// 
+		/// The collections <see cref="FailedResults" /> and <see cref="PassedResults" /> simply extract out the passed and failed <see cref="WorkResult" />
+		/// objects from the <see cref="Results" /> collection via LINQ.
+		/// </remarks>
+		/// <param name="configuration">
+		/// A <see cref="WorkActionConfiguration"/> object containing application configuration settings.
+		/// </param>
+		public WorkValidation(WorkActionConfiguration configuration)
 		{
 			Rules = new List<IWorkRule>();
 			Results = new List<IWorkResult>();
-			TransactionContext = transactionContext;
+			Configuration = configuration;
 		}
 
 		#endregion
 
 		#region Properties
 
+		/// <summary>
+		/// A <see cref="WorkActionConfiguration"/> object containing application configuration settings.
+		/// </summary>
+		internal WorkActionConfiguration Configuration { get; set; }
+
 		/// <inheritdoc cref="IWorkValidation.IsValid" path="*"/>
 		public bool IsValid { get { return Results.All(x => x.IsValid); } }
+
 		/// <inheritdoc cref="IWorkValidation.Rules" path="*"/>
 		public IList<IWorkRule> Rules { get; set; }
+
 		/// <inheritdoc cref="IWorkValidation.Results" path="*"/>
 		public IList<IWorkResult> Results { get; private set; }
 
@@ -87,25 +112,66 @@ namespace UOWRulesEngine
 			get { return Results.Where(x => x.IsValid).ToList(); }
 		}
 
-		/// <inheritdoc cref="IWorkValidation.TransactionContext" path="*"/>
-		public TransactionScope TransactionContext { get; set; }
-
-		//TODO: Add another collection for warning results if we need them later.
+		/// <inheritdoc cref="IWorkValidation.Warnings" path="*"/>
+		public IList<IWorkResult> Warnings
+		{
+			get { return Results.Where(x => x.IsWarning).ToList(); }
+		}
 
 		#endregion
 
-		#region Methods
+		#region Public Methods
 
 		/// <summary>
 		/// Executes all of the <see cref="WorkRule" /> commands (via the <see cref="IWorkRule" /> interface) so that we can determine if the 
-		/// <see cref="WorkAction" /> can be executed.
+		/// unit of work defined by the <see cref="WorkAction" /> can be executed.
 		/// </summary>
-		public void ValidateRules()
+		/// <remarks>
+		/// This method loops through all of the <see cref="IWorkRule"/> objects in the <see cref="Rules"/> collection and validates them
+		/// to determine whether or not the unit of work defined by the <see cref="WorkAction"/> or <see cref="WorkActionAsync"/> can be executed.
+		/// 
+		/// The value of the <see cref="WorkActionConfiguration.StopRuleProcessingOnFirstFailure"/> property determines if the processing will
+		/// stop or continue upon any of the <see cref="WorkRule"/> objects failing validation.
+		/// </remarks>
+		public void ValidateRules ()
 		{
 			foreach (IWorkRule rule in Rules)
 			{
 				Results.Add(rule.Execute());
+				if (rule.IsValid == false && Configuration.StopRuleProcessingOnFirstFailure)
+				{
+					return;
+				}
 			}
+		}
+
+		#endregion
+
+		#region Fluid API Methods
+
+		/// <inheritdoc cref="IWorkValidation.SetRules(IList{IWorkRule})" path="*"/>
+		public WorkValidation SetRules (IList<IWorkRule> value)
+		{
+			Rules = value;
+			return this;
+		}
+
+		/// <inheritdoc cref="IWorkValidation.SetResults(IList{IWorkResult})" path="*"/>
+		public WorkValidation SetResults (IList<IWorkResult> value)
+		{
+			Results = value;
+			return this;
+		}
+
+		/// <summary>
+		/// Fluid API method used to set the <see cref="Configuration"/> property.
+		/// </summary>
+		/// <param name="value">A <see cref="WorkActionConfiguration"/> object containing application configuration.</param>
+		/// <returns>This instance of a <see cref="WorkValidation"/> object.</returns>
+		public WorkValidation SetConfiguration (WorkActionConfiguration value)
+		{
+			Configuration = value;
+			return this;
 		}
 
 		#endregion

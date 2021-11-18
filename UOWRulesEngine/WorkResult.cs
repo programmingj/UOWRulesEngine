@@ -47,19 +47,27 @@ namespace UOWRulesEngine
 
 		#region Properties
 
-		/// <inheritdoc cref="IWorkResult.Name" path="summary"/>
+		/// <inheritdoc cref="IWorkResult.Name" path="*"/>
 		public string Name { get; set; }
-		/// <inheritdoc cref="IWorkResult.Message" path="summary"/>
+
+		/// <inheritdoc cref="IWorkResult.Message" path="*"/>
 		public string Message { get; set; }
-		/// <inheritdoc cref="IWorkResult.IsValid" path="summary"/>
+
+		/// <inheritdoc cref="IWorkResult.IsValid" path="*"/>
 		public bool IsValid { get; set; }
+
+		/// <inheritdoc cref="IWorkResult.IsWarning" path="*"/>
+		public bool IsWarning { get; set; }
+
+		/// <inheritdoc cref="IWorkResult.WarningMessage" path="*"/>
+		public string WarningMessage { get; set; }
 
 		#endregion
 
 		#region Fluent Methods.
 
 		/// <inheritdoc cref="IWorkResult.SetName(string)" path="*"/>
-		public WorkResult SetName(string value)
+		public WorkResult SetName (string value)
 		{
 			if (string.IsNullOrEmpty(value.Trim()))
 			{
@@ -71,7 +79,7 @@ namespace UOWRulesEngine
 		}
 
 		/// <inheritdoc cref="IWorkResult.SetMessage(string)" path="*"/>
-		public WorkResult SetMessage(string value)
+		public WorkResult SetMessage (string value)
 		{
 			if (string.IsNullOrEmpty(value.Trim()))
 			{
@@ -79,6 +87,13 @@ namespace UOWRulesEngine
 			}
 
 			Message = value;
+			return this;
+		}
+
+		/// <inheritdoc cref="IWorkResult.SetIsValid(bool)" path="*"/>
+		public WorkResult SetIsValid (bool value)
+		{
+			IsValid = value;
 			return this;
 		}
 

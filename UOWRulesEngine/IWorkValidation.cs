@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Transactions;
 
 namespace UOWRulesEngine
 {
@@ -29,33 +28,46 @@ namespace UOWRulesEngine
 		/// A bool value that is used to determine if all of the business rules are valid and the action can proceed.
 		/// </summary>
 		bool IsValid { get; }
+
 		/// <summary>
 		/// An IList&lt;<see cref="WorkRule" />&gt; collection containing all of the business rules that have to succeed before a <see cref="WorkAction" />
 		/// can be executed.
 		/// </summary>
 		IList<IWorkRule> Rules { get; set; }
+
 		/// <summary>
 		/// An IList&lt;<see cref="WorkResult" />&gt; collection containing the results of each of the <see cref="WorkRule" /> objects executed to validate
 		/// the business rules for a <see cref="WorkAction" />.
 		/// </summary>
 		IList<IWorkResult> Results { get; }
+
 		/// <summary>
-		/// Returns only the <see cref="WorkResult" /> objects for rules that failed.
+		/// Calculated property returning only the <see cref="WorkResult" /> objects for rules that failed.
 		/// </summary>
 		IList<IWorkResult> FailedResults { get; }
+
 		/// <summary>
-		/// Returns only the <see cref="WorkResult" /> objects for rules that passed.
+		/// Calculated property returning only the <see cref="WorkResult" /> objects for rules that passed.
 		/// </summary>
 		IList<IWorkResult> PassedResults { get; }
+
 		/// <summary>
-		/// Used to run the <see cref="WorkAction" /> in a transaction when running multiple actions together.
+		/// returning only the <see cref="WorkResult"/> objects for rules that generated a warning.
 		/// </summary>
-		/// <remarks>
-		/// If only 1 action is being executed there is no reason to have a <see cref="TransactionScope" /> as no work is performed if any of the 
-		/// business rules fail unless multiple changes are being made by a single action. For instance, if you are updating multiple rows of data 
-		/// in a single action you could use the scope to handle rolling back changes if any of the steps fail. But this is handled by the method
-		/// override and as such the developer already has full control over the rollback capabilities of the action.
-		/// </remarks>
-		TransactionScope TransactionContext { get; set; }
+		IList<IWorkResult> Warnings { get; }
+
+		/// <summary>
+		/// Fluid API method used to set the <see cref="Rules"/> property.
+		/// </summary>
+		/// <param name="value">An <see cref="IList{T}"/> of <see cref="IWorkRule"/> objects.</param>
+		/// <returns>This instance of a <see cref="WorkValidation"/> object.</returns>
+		WorkValidation SetRules(IList<IWorkRule> value);
+
+		/// <summary>
+		/// Fluid API method used to set the <see cref="Results"/> property.
+		/// </summary>
+		/// <param name="value">An <see cref="IList{T}"/> of <see cref="IWorkResult"/> objects.</param>
+		/// <returns>This instance of a <see cref="WorkValidation"/> object.</returns>
+		WorkValidation SetResults(IList<IWorkResult> value);
 	}
 }
