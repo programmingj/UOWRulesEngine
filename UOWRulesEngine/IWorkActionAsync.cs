@@ -6,9 +6,8 @@ using static UOWRulesEngine.Enums;
 namespace UOWRulesEngine
 {
 	/// <summary>
-	/// Exposes the <see cref="ExecuteAsync"/> method following the Command pattern to work with
-	/// <see cref="WorkActionAsync"/> objects containing the logic for the action.
-	/// to be performed.
+	/// Exposes the <see cref="ExecuteAsync"/> method following the Command pattern to work with classes that inherit from the
+	/// WorkActionAsync abstract class and that contain the logic for the Unit of Work being represented.
 	/// </summary>
 	/// 
 	/// <see cref="WorkActionAsync"/>

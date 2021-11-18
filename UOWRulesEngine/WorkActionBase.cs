@@ -41,6 +41,27 @@ namespace UOWRulesEngine
         public WorkActionProcessingStage ProcessingStage { get; internal set; }
 
         /// <summary>
+        /// A bool property that flags the implemented <see cref="WorkAction"/> or <see cref="WorkActionAsync"/> class as a
+        /// child work action.
+        /// </summary>
+        /// <remarks>
+        /// This property affects the way the <see cref="IWorkRule"/> objects are added to the <see cref="WorkValidation.Rules"/>
+        /// collection and which collection can be used. For "parent" classes the rules are added to the inheriting class'
+        /// <see cref="WorkValidationContext"/> property's <see cref="WorkValidation.Rules"/> collection.
+        /// 
+        /// For child classes, classes flagged with this property set to true, the rules can't be added to their internal
+        /// validation context's rules list. They have to be added to the parent work action's rules collection.
+        /// </remarks>
+        public bool IsChildAction { get; set; }
+
+        /// <summary>
+        /// Stores a reference to the work action class, classes implementing the <see cref="WorkAction"/> or
+        /// <see cref="WorkActionAsync"/> classes, so that the parent's properties can be examined and the <see cref="IWorkRule"/>
+        /// objects can be added to it's rules collection.
+        /// </summary>
+        public IWorkAction ParentWorkAction { get; set; }
+
+        /// <summary>
         /// A <see cref="WorkActionResult"/> Enum value indicating success or failure of the action.
         /// </summary>
         public WorkActionResult Result { get; protected set; }
