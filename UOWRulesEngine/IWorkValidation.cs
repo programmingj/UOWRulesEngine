@@ -56,6 +56,8 @@ namespace UOWRulesEngine
 		/// </summary>
 		IList<IWorkResult> Warnings { get; }
 
+		#region Fluent API Method Definitions.
+
 		/// <summary>
 		/// Fluid API method used to set the <see cref="Rules"/> property.
 		/// </summary>
@@ -69,5 +71,7 @@ namespace UOWRulesEngine
 		/// <param name="value">An <see cref="IList{T}"/> of <see cref="IWorkResult"/> objects.</param>
 		/// <returns>This instance of a <see cref="WorkValidation"/> object.</returns>
 		WorkValidation SetResults(IList<IWorkResult> value);
+
+		#endregion Fluent API Method Definitions.
 	}
 }

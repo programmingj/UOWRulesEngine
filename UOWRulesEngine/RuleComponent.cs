@@ -3,18 +3,18 @@
 namespace UOWRulesEngine
 {
 	/// <summary>
-	/// The abstract base class for the <see cref="WorkRule" /> abstract class.
+	/// The abstract base class for the <see cref="WorkRule"/> abstract class.
 	/// </summary>
-	/// <seealso cref="IWorkRule">IWorkRule Interface</seealso>
-	/// <seealso cref="WorkRule">WorkRule Class</seealso>
-	/// <seealso cref="IWorkValidation">IWorkValidation Interface</seealso>
-	/// <seealso cref="WorkValidation">WorkValidation Class</seealso>
-	/// <seealso cref="IWorkAction">IWorkAction Interface</seealso>
-	/// <seealso cref="WorkAction">WorkAction Class</seealso>
-	/// <seealso cref="IWorkResult">IWorkResult Interface</seealso>
-	/// <seealso cref="WorkResult">WorkResult Class</seealso>
+	/// <seealso cref="IWorkRule"/>
+	/// <seealso cref="WorkRule"/>
+	/// <seealso cref="IWorkValidation"/>
+	/// <seealso cref="WorkValidation"/>
+	/// <seealso cref="IWorkAction"/>
+	/// <seealso cref="WorkAction"/>
+	/// <seealso cref="IWorkResult"/>
+	/// <seealso cref="WorkResult"/>
 	/// <remarks>
-	/// The <see cref="IWorkRule" /> interface defines the Execute() method inplementing the Command pattern for the business rules. The rest of the
+	/// The <see cref="IWorkRule"/> interface defines the <see cref="Execute()"/> method inplementing the Command pattern for the business rules. The rest of the
 	/// functionality for business rules is implemented by inheriting from the <see cref="WorkRule" /> class, which in turn inherits from the
 	/// <see cref="RuleComponent" /> class. This implements the <see cref="IWorkRule"/> interface and as such the implementation for Execute() is
 	/// here. When implementing a new business rule by inheriting from the <see cref="WorkRule" /> class you have to override the <see cref="Verify()" />
@@ -25,13 +25,14 @@ namespace UOWRulesEngine
 		#region Constructors
 
 		/// <summary>
-		/// Initializes a new instance of the RuleComponent class. This is the base class for the <see cref="WorkRule" /> class and allows custom rules to be
-		/// created by inheriting from <see cref="WorkRule" /> then overriding the <see cref="Verify"/> method to implement the business
-		/// rule logic. These rules are then executed by the <see cref="IWorkAction"/> during it's processing pipeline before any work is actually
-		/// started.  If the logic in these rules does not pass, the action's processing code is never executed and the failed rules can be examined by the
-		/// calling process to determine where the problem lies.
+		/// Initializes a new instance of the <see cref="RuleComponent"/> class. This is the base class for the <see cref="WorkRule" /> class and 
+		/// allows custom rules to be created by inheriting from <see cref="WorkRule" /> then overriding the <see cref="Verify"/> method to implement
+		/// the business rule logic. These rules are then executed by the <see cref="WorkValidation.ValidateRules()"/> method during the
+		/// <see cref="WorkAction"/> and <see cref="WorkActionAsync"/> processing pipeline execution before any work defined representing the Unit of
+		/// Work can be executed. If the logic in these rules does not pass, the action's processing code is never executed and the failed rules can be
+		/// examined by the calling process to determine where the problem occurred.
 		/// </summary>
-		/// <param name="name">A string containing the name of the business rule.</param>
+		/// <param name="name">A string containing the name of the business rule. These value must be unique.</param>
 		/// <param name="message">A string containing the message that the calling code will display if the business rule fails.</param>
 		protected RuleComponent(string name, string message)
 		{
@@ -53,7 +54,7 @@ namespace UOWRulesEngine
 		#region Properties
 
 		/// <summary>
-		/// The Name of the rule. Used by implementing code when a rule fails.
+		/// The Name of the rule. Used by the implementing code when a rule fails. Must be unique.
 		/// </summary>
 		public string Name { get; set; }
 
@@ -67,6 +68,11 @@ namespace UOWRulesEngine
 		/// </summary>
 		public bool IsValid { get; set; }
 
+		/// <summary>
+		/// A flag that determines whether or not this rule has already been processed.
+		/// </summary>
+		public bool HasBeenProcessed { get; private set; }
+
 		#endregion
 
 		#region Cores
@@ -74,9 +80,27 @@ namespace UOWRulesEngine
 		/// <summary>
 		/// Implementation of the Execute method from the interface for the Command pattern.
 		/// </summary>
+		/// <remarks>
+		/// The <see cref="HasBeenProcessed"/> flag is set by this method so that implementers don't have to call
+		/// <code><![CDATA[base.Verify()]]>.</code>
+		/// </remarks>
 		/// <returns>An <see cref="IWorkResult" /> object containing the results of the rule verification.</returns>
+		/// <exception cref="UnitOfWorkException">
+		/// A <see cref="UnitOfWorkException"/> is thrown if there is an attempt to execute a rule more than one time.
+		/// </exception>
 		public IWorkResult Execute()
 		{
+			// Make sure we haven't already processed this rule. If we have throw an Exception.
+			if (HasBeenProcessed)
+			{
+				throw (new UnitOfWorkException(
+					"The rule has already been processed but an attempt has been made to validate the rule again."));
+			}
+
+			// Just in case the implementer forgets to call the base Verify() method or otherwise set the HasBeenProcessed flag
+			// set it for rule just processed.
+			HasBeenProcessed = true;
+
 			return Verify();
 		}
 

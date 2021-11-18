@@ -1,13 +1,18 @@
 using Moq;
-using System.Collections.Generic;
 using Xunit;
 using UOWRulesEngine;
-using UOWRulesEngine.Rules;
+using UOWRulesEngineTests.Setup;
 
 namespace UOWRulesEngineTests
 {
+	/// <summary>
+	/// Collection of tests for the <see cref="WorkValidation"/> objects.
+	/// </summary>
 	public class WorkValidationTests : UOWRulesEngineTestsBase
 	{
+		/// <summary>
+		/// Default constructor. Instantiates a new <see cref="WorkValidationTests"/> object.
+		/// </summary>
 		public WorkValidationTests()
 		{
 		}
@@ -25,7 +30,7 @@ namespace UOWRulesEngineTests
 			validation.SetConfiguration(config);
 
 			// Get the list of rules with failures in it to test with.
-			validation.Rules = GetRulesList(true);
+			validation.Rules = UOWTestDataSetup.GetRulesList(true);
 
 			// Execute the ValidateRules we're testing to make sure that the conditions being tested check out.
 			validation.ValidateRules();
@@ -46,7 +51,7 @@ namespace UOWRulesEngineTests
 			validation.SetConfiguration(config);
 
 			// Get the list of rules with failures in it to test with.
-			validation.Rules = GetRulesList(true);
+			validation.Rules = UOWTestDataSetup.GetRulesList(true);
 
 			// Execute the ValidateRules we're testing to make sure that the conditions being tested check out.
 			validation.ValidateRules();

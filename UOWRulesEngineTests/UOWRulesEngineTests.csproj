@@ -7,7 +7,7 @@
 
     <Nullable>disable</Nullable>
 
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
 
     <DocumentationFile></DocumentationFile>
 

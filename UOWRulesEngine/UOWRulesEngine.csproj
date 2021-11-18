@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\UOWAtributeBase.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="IWorkActionAsync.cs" />
@@ -60,7 +61,6 @@
     <Compile Include="Rules\ValueTypesAreNotEqualRule.cs" />
     <Compile Include="Rules\ThrownExceptionRule.cs" />
     <Compile Include="UnitOfWorkException.cs" />
-    <Compile Include="UOWAttributeBase.cs" />
     <Compile Include="WorkAction.cs" />
     <Compile Include="WorkActionAsync.cs" />
     <Compile Include="WorkActionBase.cs" />

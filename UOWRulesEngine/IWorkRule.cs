@@ -17,6 +17,9 @@
 		/// <inheritdoc cref="RuleComponent.IsValid" path="*"/>
 		bool IsValid { get; set; }
 
+		/// <inheritdoc cref="RuleComponent.HasBeenProcessed" path="*"/>
+		bool HasBeenProcessed { get; }
+
 		/// <inheritdoc cref="RuleComponent.Execute()" path="*"/>
 		IWorkResult Execute();
 	}
