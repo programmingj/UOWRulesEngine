@@ -96,6 +96,12 @@ namespace UOWRulesEngine
 
 		#region Properties
 
+		/// <summary>
+		/// Stores a reference to the parent <see cref="WorkAction"/> class so that the parent's properties can be examined
+		/// and the <see cref="IWorkRule"/> objects can be added to it's <see cref="WorkValidation.Rules"/> collection.
+		/// </summary>
+		public WorkAction ParentWorkAction { get; set; }
+
 		#endregion
 
 		#region Public Methods
@@ -113,8 +119,17 @@ namespace UOWRulesEngine
 				ProcessingStage = WorkActionProcessingStage.AddRules;
 
 				// Add all of the business rules to the WorkValidation.Rules collection so that we can
-				// check them before performing the action
-				AddRules(WorkValidationContext.Rules);
+				// check them before performing the action.
+				// NOTE: If this is a Child work action the rules can't be added to the internal WorkValidationContext.Rules
+				// collection. They have to be added to the parent work action's rules collection.
+				if (IsChildAction)
+				{
+					AddRules(ParentWorkAction.WorkValidationContext.Rules);
+				}
+				else
+				{
+					AddRules(WorkValidationContext.Rules);
+				}
 
 				ProcessingStage = WorkActionProcessingStage.PreValidateRules;
 

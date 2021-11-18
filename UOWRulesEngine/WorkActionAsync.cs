@@ -99,6 +99,12 @@ namespace UOWRulesEngine
 
 		#region Properties
 
+		/// <summary>
+		/// Stores a reference to the parent <see cref="WorkActionAsync"/> class so that the parent's properties can be examined
+		/// and the <see cref="IWorkRule"/> objects can be added to it's <see cref="WorkValidation.Rules"/> collection.
+		/// </summary>
+		public WorkActionAsync ParentWorkAction { get; set; }
+
 		#endregion
 
 		#region Public Methods
@@ -115,9 +121,18 @@ namespace UOWRulesEngine
 
 				ProcessingStage = WorkActionProcessingStage.AddRules;
 
-				// Add all of the business rules to the WorkValidation.Rules collection so that we can check
-				// them before performing the action.
-				await AddRulesAsync(WorkValidationContext.Rules);
+				// Add all of the business rules to the WorkValidation.Rules collection so that we can
+				// check them before performing the action.
+				// NOTE: If this is a Child work action the rules can't be added to the internal WorkValidationContext.Rules
+				// collection. They have to be added to the parent work action's rules collection.
+				if (IsChildAction)
+				{
+					await AddRulesAsync(ParentWorkAction.WorkValidationContext.Rules);
+				}
+				else
+				{
+					await AddRulesAsync(WorkValidationContext.Rules);
+				}
 
 				ProcessingStage = WorkActionProcessingStage.PreValidateRules;
 

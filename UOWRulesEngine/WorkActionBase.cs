@@ -55,13 +55,6 @@ namespace UOWRulesEngine
         public bool IsChildAction { get; set; }
 
         /// <summary>
-        /// Stores a reference to the work action class, classes implementing the <see cref="WorkAction"/> or
-        /// <see cref="WorkActionAsync"/> classes, so that the parent's properties can be examined and the <see cref="IWorkRule"/>
-        /// objects can be added to it's rules collection.
-        /// </summary>
-        public IWorkAction ParentWorkAction { get; set; }
-
-        /// <summary>
         /// A <see cref="WorkActionResult"/> Enum value indicating success or failure of the action.
         /// </summary>
         public WorkActionResult Result { get; protected set; }
