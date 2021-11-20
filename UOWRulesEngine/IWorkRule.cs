@@ -1,4 +1,6 @@
-﻿namespace UOWRulesEngine
+﻿using System.Threading.Tasks;
+
+namespace UOWRulesEngine
 {
 	/// <summary>
 	/// Exposes the Execute() method following the Command pattern to work with <see cref="WorkRule" /> objects containing business rule logic for
@@ -22,5 +24,8 @@
 
 		/// <inheritdoc cref="RuleComponent.Execute()" path="*"/>
 		IWorkResult Execute();
+
+		/// <inheritdoc cref="RuleComponent.ExecuteAsync()" path="*"/>
+		Task<IWorkResult> ExecuteAsync();
 	}
 }

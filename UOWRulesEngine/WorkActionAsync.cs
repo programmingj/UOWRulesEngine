@@ -142,7 +142,7 @@ namespace UOWRulesEngine
 				ProcessingStage = WorkActionProcessingStage.ValidateRules;
 
 				// Execute all of the rules to make sure we can run the action
-				((WorkValidation)WorkValidationContext).ValidateRules();
+				await ((WorkValidation)WorkValidationContext).ValidateRulesAsync();
 
 				// If validation failed return
 				if (WorkValidationContext.IsValid == false)

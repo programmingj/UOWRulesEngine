@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace UOWRulesEngine
 {
@@ -131,13 +132,40 @@ namespace UOWRulesEngine
 		/// to determine whether or not the unit of work defined by the <see cref="WorkAction"/> or <see cref="WorkActionAsync"/> can be executed.
 		/// 
 		/// The value of the <see cref="WorkActionConfiguration.StopRuleProcessingOnFirstFailure"/> property determines if the processing will
-		/// stop or continue upon any of the <see cref="WorkRule"/> objects failing validation.
+		/// stop or continue upon any of the <see cref="WorkRule"/> objects failing validation. If the property is true and a rule fails validation
+		/// processing of the rules is immediately stopped and execution is returned to the calling code. If it's false processing of the rules
+		/// continues until all rules have been processed before returning to the calling code.
 		/// </remarks>
-		public void ValidateRules ()
+		internal void ValidateRules ()
 		{
 			foreach (IWorkRule rule in Rules)
 			{
 				Results.Add(rule.Execute());
+				if (rule.IsValid == false && Configuration.StopRuleProcessingOnFirstFailure)
+				{
+					return;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Executes all of the <see cref="WorkRule" /> commands (via the <see cref="IWorkRule"/> interface) so that we can determine if the 
+		/// unit of work defined by the <see cref="WorkAction" /> or <see cref="WorkActionAsync"/> objects can be executed.
+		/// </summary>
+		/// <remarks>
+		/// This method loops through all of the <see cref="IWorkRule"/> objects in the <see cref="Rules"/> collection and validates them
+		/// to determine whether or not the unit of work defined by the <see cref="WorkAction"/> or <see cref="WorkActionAsync"/> can be executed.
+		/// 
+		/// The value of the <see cref="WorkActionConfiguration.StopRuleProcessingOnFirstFailure"/> property determines if the processing will
+		/// stop or continue upon any of the <see cref="WorkRule"/> objects failing validation. If the property is true and a rule fails validation
+		/// processing of the rules is immediately stopped and execution is returned to the calling code. If it's false processing of the rules
+		/// continues until all rules have been processed before returning to the calling code.
+		/// </remarks>
+		internal async Task ValidateRulesAsync()
+		{
+			foreach (IWorkRule rule in Rules)
+			{
+				Results.Add(await rule.ExecuteAsync());
 				if (rule.IsValid == false && Configuration.StopRuleProcessingOnFirstFailure)
 				{
 					return;
