@@ -1,6 +1,5 @@
-using Moq;
 using Xunit;
-using UOWRulesEngine;
+using UOWRulesEngineCore;
 using UOWRulesEngineTests.Setup;
 
 namespace UOWRulesEngineTests
@@ -17,6 +16,9 @@ namespace UOWRulesEngineTests
 		{
 		}
 
+		/// <summary>
+		/// Tests to ensure the code honors the short circuit pattern implementation for the StopRuleProcessingOnFirstFailure property.
+		/// </summary>
 		[Fact]
 		public void WorkValidation_ValidateRules_StopsOnFirstError()
 		{
@@ -38,13 +40,16 @@ namespace UOWRulesEngineTests
 			Assert.Equal(1, validation.FailedResults.Count);
 		}
 
+		/// <summary>
+		/// Tests to make sure the code executes all rules even if one fails.
+		/// </summary>
 		[Fact]
 		public void WorkValidation_ValidateRules_RunsAllRulesOnError()
 		{
 			WorkActionConfiguration config = new WorkActionConfiguration();
 			WorkValidation validation = new WorkValidation();
 
-			// Make sure the WorkActionConfiguration is set up to stop upon the first error encountered.
+			// Make sure the WorkActionConfiguration is set up to process all rules.
 			config.StopRuleProcessingOnFirstFailure = false;
 
 			// Set up the WorkValidation object so that we can test the method.

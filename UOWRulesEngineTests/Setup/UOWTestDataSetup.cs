@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using UOWRulesEngine;
-using UOWRulesEngine.Rules;
+using UOWRulesEngineCore;
+using UOWRulesEngineCore.Rules;
 
 namespace UOWRulesEngineTests.Setup
 {
